@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="RPi Remote Run" type="com.jetbrains.cidr.remote.gdbserver.type" factoryName="com.jetbrains.cidr.remote.gdbserver.factory" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="rpi-clion-example" TARGET_NAME="rpi-stripped.elf" CONFIG_NAME="Debug-MinGW RPI" version="1" RUN_PATH="$PROJECT_DIR$/cmake-build-debug-mingw-rpi/rpi-stripped.elf">
+    <custom-gdb-server version="1" gdb-connect="192.168.0.110:1234" executable="" warmup-ms="0" download-type="ALWAYS" hostId="edd1cdec-3f07-4de7-bb85-77fa31eabb82" uploadFile="/tmp/CLion/debug/rpi-stripped.elf" defaultGdbServerArgs=":1234 /tmp/CLion/debug/rpi-stripped.elf">
+      <debugger kind="GDB" isBundled="true" />
+    </custom-gdb-server>
+    <method v="2">
+      <option name="CLION.COMPOUND.BUILD" enabled="true" />
+    </method>
+  </configuration>
+</component>
