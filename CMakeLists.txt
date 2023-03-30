@@ -1,26 +1,71 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.23)
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
+##
+## Toolchain base definitions for SysGCC
+##
 set(TOOLCHAIN_DIR C:/SysGCC/raspberry64)
+list(APPEND CMAKE_PROGRAM_PATH "${TOOLCHAIN_DIR}/bin/")
+
+##
+## Sysroot for SysGCC
+##
 set(CMAKE_SYSROOT ${TOOLCHAIN_DIR}/aarch64-linux-gnu/sysroot)
-set(CMAKE_SYSROOT_LINK  ${CMAKE_SYSROOT})
-set(CMAKE_CXX_COMPILER ${TOOLCHAIN_DIR}/bin/aarch64-linux-gnu-g++.exe)
-set(CMAKE_C_COMPILER ${TOOLCHAIN_DIR}/bin/aarch64-linux-gnu-gcc.exe)
+set(CMAKE_SYSROOT_LINK ${CMAKE_SYSROOT})
+
+##
+## Toolchain settings
+##
+set(CMAKE_CXX_COMPILER aarch64-linux-gnu-g++)
+set(CMAKE_C_COMPILER aarch64-linux-gnu-gcc)
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
-project(rpi-clion-example)
+##
+## Project definition
+##
 
+project(rpi-clion-example C CXX)
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_EXECUTABLE_SUFFIX .elf)
 
-add_executable(rpi.elf problem_007.cpp)
+##
+## Create static gpiod libraries for C and C++
+##
 
-add_custom_target(rpi-stripped.elf ALL
-        ${TOOLCHAIN_DIR}/bin/aarch64-linux-gnu-objcopy.exe -g rpi.elf rpi-stripped.elf
-        DEPENDS rpi.elf
-        BYPRODUCTS rpi-stripped.elf
+#Download and unpack
+include(FetchContent)
+FetchContent_Declare(libgpiod-dev
+        URL http://ftp.debian.org/debian/pool/main/libg/libgpiod/libgpiod-dev_1.6.2-1_arm64.deb
+        DOWNLOAD_EXTRACT_TIMESTAMP true
+)
+FetchContent_MakeAvailable(libgpiod-dev)
+file(ARCHIVE_EXTRACT
+        INPUT ${libgpiod-dev_SOURCE_DIR}/data.tar.xz
+        DESTINATION ${libgpiod-dev_SOURCE_DIR}
         )
+
+# Static C library
+add_library(libgpiod-dev STATIC IMPORTED)
+set_target_properties(libgpiod-dev PROPERTIES
+        IMPORTED_LOCATION ${libgpiod-dev_SOURCE_DIR}/usr/lib/aarch64-linux-gnu/libgpiod.a
+        INTERFACE_INCLUDE_DIRECTORIES ${libgpiod-dev_SOURCE_DIR}/usr/include
+        )
+
+# Static C++ library
+add_library(libgpiodcxx-dev STATIC IMPORTED)
+set_target_properties(libgpiodcxx-dev PROPERTIES
+        IMPORTED_LOCATION ${libgpiod-dev_SOURCE_DIR}/usr/lib/aarch64-linux-gnu/libgpiodcxx.a
+        INTERFACE_INCLUDE_DIRECTORIES ${libgpiod-dev_SOURCE_DIR}/usr/include
+        )
+
+##
+## Project code itself
+##
+add_executable(${PROJECT_NAME} main.c cpp.cpp)
+target_link_libraries(${PROJECT_NAME} libgpiod-dev libgpiodcxx-dev)
