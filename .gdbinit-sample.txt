@@ -1,0 +1,4 @@
+define target hookpost-remote
+	symbol-file D:/work/tests/rpi-clion-example/cmake-build-debug-mingw-rpi/rpi-clion-example.elf
+	info files
+end
